@@ -1,0 +1,90 @@
+services:
+  
+  liferay-1:
+    image: liferay/dxp:202x.qx.x
+    environment:
+      LIFERAY_JPDA_ENABLED: "true" # enable remote debugging
+      LIFERAY_DISABLE_TRIAL_LICENSE: "true"
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://${MACHINE_HOST_IP}:5432/202x.qx.x-1
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: liferay
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: xz0ZHD5UeE
+
+    ports:
+      - 8001:8000 
+      - 8081:8080
+    volumes:
+      - ./liferay-1:/mnt/liferay
+      - ./scripts-1:/usr/local/liferay/scripts
+      - ./data-1:/opt/liferay/data  
+      - ./logs-1:/opt/liferay/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 30s
+      start_period: 60s
+      retries: 5
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  liferay-2:
+    image: liferay/dxp:202x.qx.x
+    environment:
+      LIFERAY_JPDA_ENABLED: "true" # enable remote debugging
+      LIFERAY_DISABLE_TRIAL_LICENSE: "true"
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://${MACHINE_HOST_IP}:5432/202x.qx.x-2
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: liferay
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: xz0ZHD5UeE
+
+    ports:
+      - 8002:8000 
+      - 8082:8080
+    volumes:
+      - ./liferay-2:/mnt/liferay
+      - ./scripts-2:/usr/local/liferay/scripts
+      - ./data-2:/opt/liferay/data
+      - ./logs-2:/opt/liferay/logs
+    # healthcheck:
+    #   interval: 30s
+    #   timeout: 30s
+    #   start_period: 1m
+    #   retries: 20
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      liferay-1:
+        condition: service_healthy
+        
+  elasticsearch:
+    image: bitnami/elasticsearch:7.17.6
+    environment:
+      ELASTICSEARCH_CLUSTER_NAME: 'LiferayElasticsearchCluster'
+      ELASTICSEARCH_PLUGINS: 'analysis-icu,analysis-kuromoji,analysis-smartcn,analysis-stempel'
+      ELASTICSEARCH_DISCOVERY_TYPE: 'single-node' # to accept requests from host machine
+      XPACK_SECURITY_ENABLED: 'false' # to accept requests from host machine
+
+    ports:
+      - 9200:9200 
+    volumes:
+      - ./elasticsearch/data:/opt/bitnami/elasticsearch/data
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    healthcheck:
+      test: curl -fsS http://localhost:9200 || exit 1
+      interval: 20s
+      timeout: 20s
+      start_period: 30s
+      retries: 10
+
+
+
+    

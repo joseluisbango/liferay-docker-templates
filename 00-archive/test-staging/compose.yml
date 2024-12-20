@@ -1,0 +1,60 @@
+version: '3'
+services:
+  liferay-staging:
+    image: liferay/dxp:7.4.13-u64
+    environment:
+      LIFERAY_JPDA_ENABLED: "true" # enable remote debugging
+      #JPDA_ADDRESS: 0.0.0.0:8000 # needed for liferay/dxp:7.2.10.1 (and older) images (https://github.com/liferay/liferay-docker/issues/35)
+      LIFERAY_DISABLE_TRIAL_LICENSE: "true"
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://${MACHINE_HOST_IP}:5432/74u64-staging
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: liferay
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: xz0ZHD5UeE
+
+      LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET: 1234567890123456
+      LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HOSTS_PERIOD_ALLOWED: 127.0.0.1,SERVER_IP,172.30.30.11
+    ports:
+      - 8000:8000 # Expose port for debugging
+      - 8080:8080
+      #- 11311:11311 # OSGi console
+      #- 9201:9201 # Elasticsearch
+    networks:
+      lr-network:
+        ipv4_address: 172.30.30.10
+    volumes:
+      - ./liferay-staging:/mnt/liferay
+      - ./scripts-staging:/usr/local/liferay/scripts
+      - ./data-staging:/opt/liferay/data
+
+  liferay-remote:
+    image: liferay/dxp:7.4.13-u64
+    environment:
+      LIFERAY_JPDA_ENABLED: "true" # enable remote debugging
+      #JPDA_ADDRESS: 0.0.0.0:8000 # needed for liferay/dxp:7.2.10.1 (and older) images (https://github.com/liferay/liferay-docker/issues/35)
+      LIFERAY_DISABLE_TRIAL_LICENSE: "true"
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://${MACHINE_HOST_IP}:5432/74u64-remote
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: liferay
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: xz0ZHD5UeE
+
+      LIFERAY_TUNNELING_PERIOD_SERVLET_PERIOD_SHARED_PERIOD_SECRET: 1234567890123456
+      LIFERAY_TUNNEL_PERIOD_SERVLET_PERIOD_HOSTS_PERIOD_ALLOWED: 127.0.0.1,SERVER_IP,172.30.30.10
+    ports:
+      - 8001:8000 # Expose port for debugging
+      - 8081:8080
+    networks:
+      lr-network:
+        ipv4_address: 172.30.30.11
+    volumes:
+      - ./liferay-remote:/mnt/liferay
+      - ./scripts-remote:/usr/local/liferay/scripts
+      - ./data-remote:/opt/liferay/data  
+networks:
+  lr-network:
+    external: true
+
+    

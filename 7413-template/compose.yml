@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  liferay:
+    image: liferay/dxp:7.4.13-u
+
+    environment:      
+      LIFERAY_JPDA_ENABLED: "true" 
+      LIFERAY_DISABLE_TRIAL_LICENSE: "true"
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      LIFERAY_SESSION_PERIOD_TIMEOUT_PERIOD_AUTO_PERIOD_EXTEND: "true"
+
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://${MACHINE_HOST_IP}:5432/74u
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: liferay
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: xz0ZHD5UeE
+      
+      #LIFERAY_UPGRADE_PERIOD_DATABASE_PERIOD_AUTO_PERIOD_RUN: "true"
+
+    ports:
+      - 7400:8000
+      - 8074:8080
+      - 11374:11311 
+      - 9274:9201 # Elassticsearch, 7.0-7.2 -> 9200, 7.3+ -> 9201
+
+    volumes:
+      - ./liferay:/mnt/liferay
+      - ./scripts:/usr/local/liferay/scripts
+      - ./data:/opt/liferay/data
+      - ./logs:/opt/liferay/logs
+#networks:
+#  lr-network:
+#    driver: bridge
+
+    
